@@ -341,7 +341,20 @@ html{-webkit-text-size-adjust:100%}*{-webkit-tap-highlight-color:transparent}bod
 .st b.tick{animation:tkp .7s}@keyframes tkp{50%{transform:scale(1.18);color:var(--g)}}
 .pchips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.pchip{padding:6px 12px;border-radius:99px;background:#ffffff10;border:1px solid #ffffff22;font-size:12px}
 .nodata>*:not(.ndo){opacity:.1;filter:blur(3px);pointer-events:none}.ndo{position:absolute;inset:0;display:grid;place-content:center;text-align:center;gap:4px;z-index:2}.ndo b{font-size:16px}.ndo small{font:11px var(--mono);color:#fffa}
-</style></head><body class="calm"><svg width="0" height="0" style="position:absolute"><defs>
+
+/* ===== v11 · boot (>=5s, light), notifications ===== */
+#boot{display:none;position:fixed;inset:0;z-index:100;place-items:center;text-align:center;background:radial-gradient(ellipse at 50% 38%,#0D2845,#040412 70%);color:#fffc;font:12px var(--mono);letter-spacing:2px;transition:opacity .6s}
+html.has-sess #boot{display:grid}#boot.out{opacity:0;pointer-events:none}
+#boot .bt{position:relative}#boot .bt::before{content:"";position:absolute;left:50%;top:38px;width:340px;height:340px;margin:-170px 0 0 -170px;border-radius:50%;background:radial-gradient(circle,rgba(0,198,255,.2),transparent 65%)}
+#boot .bt>*{position:relative}
+.bm{width:84px;height:80px;margin:0 auto 18px;background:var(--mkimg) center/contain no-repeat;animation:bm3d 2.4s ease-in-out infinite;will-change:transform;filter:none}
+@keyframes bm3d{0%{transform:perspective(500px) rotateY(0)}100%{transform:perspective(500px) rotateY(360deg)}}
+.bbar{width:min(220px,60vw);height:3px;background:#ffffff22;border-radius:3px;margin:18px auto 0;overflow:hidden}.bbar i{display:block;height:100%;width:100%;transform-origin:left;transform:scaleX(0);background:linear-gradient(90deg,#00C6FF,#7B61FF);animation:bbf 5s linear forwards}
+@keyframes bbf{to{transform:scaleX(1)}}#dash.reveal .main{animation:rise .7s cubic-bezier(.22,1,.36,1)}
+@keyframes bmp{50%{opacity:.4}}
+@media(prefers-reduced-motion:reduce){#boot .bm,#wipe .bm{animation:bmp 1.6s ease-in-out infinite!important}#boot .bbar i{animation:bbf 5s linear forwards!important}}
+.ib.ring{animation:belr .8s}@keyframes belr{15%{transform:rotate(14deg)}30%{transform:rotate(-12deg)}45%{transform:rotate(9deg)}60%{transform:rotate(-6deg)}}.n2.go{cursor:pointer}
+</style><script>try{if(localStorage.getItem('bfa_s1'))document.documentElement.classList.add('has-sess')}catch(e){}</script></head><body class="calm"><div id="boot"><div class="bt"><div class="bm"></div><div id="bst">TUNING IN…</div><div class="bbar"><i></i></div></div></div><svg width="0" height="0" style="position:absolute"><defs>
 <symbol id="i-mail" viewBox="0 0 24 24"><path d="M3 6h18v12H3zM3 7l9 7 9-7"/></symbol>
 <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></symbol>
 <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></symbol>
@@ -573,7 +586,7 @@ lsd('bfa_proj');let PI=1,SES=null,ART=null,PEND={};const FL={},sk=()=>'bfa_s'+PI
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const loadSess=()=>{try{SES=JSON.parse(ls(sk()))}catch(e){SES=null}},clearSess=()=>{SES=null;lsd(sk())};
 const setSess=d=>{SES={access_token:d.access_token,refresh_token:d.refresh_token,user:d.user||SES?.user,exp:Date.now()+(d.expires_in||3600)*1000};ls(sk(),JSON.stringify(SES))};
-loadSess();if(SES)document.body.insertAdjacentHTML('beforeend','<div id="boot"><div><div class="bm"></div>Tuning in…</div></div>');
+loadSess();
 async function API(path,o={}){const P=PROJ[PI],once=async()=>{const h={apikey:P.key,Authorization:'Bearer '+(SES?.access_token||P.key),...(o.headers||{})};let b=o.body;if(b&&typeof b=='object'){h['Content-Type']='application/json';b=JSON.stringify(b)}const r=await fetch(P.url+path,{method:o.method||'GET',headers:h,body:b}),t=await r.text();let j=null;try{j=t?JSON.parse(t):null}catch(e){j=t}return{r,j}};
  let{r,j}=await once();
  if(r.status==401&&SES?.refresh_token&&!path.includes('/auth/v1/token')){try{await refresh();({r,j}=await once())}catch(e){}}
@@ -614,7 +627,7 @@ async function route(name){let p;[ART,p]=await Promise.all([getArtist(),API(`/re
   if(p.length){fillDash();enter();return}
   return showSec(ART.name,'Welcome back! Add your legal details to open your dashboard.')}
  showSec(name,name?'Almost there · a few details for your artist profile.':'No artist profile yet · let us create yours.')}
-function showSec(name,sub){SEC.name=name;$('#anw').classList.toggle('hide',!!name);$('#secsub').textContent=sub;$('#authMain').classList.add('hide');$('#authSec').classList.remove('hide');$('#boot')&&$('#boot').remove()}
+function showSec(name,sub){SEC.name=name;$('#anw').classList.toggle('hide',!!name);$('#secsub').textContent=sub;$('#authMain').classList.add('hide');$('#authSec').classList.remove('hide');bootDone(true)}
 function backAuth(){clearSess();ART=null;$('#authSec').classList.add('hide');$('#authMain').classList.remove('hide')}
 async function secNext(){const g=i=>$('#'+i),v=i=>g(i).value.trim();
  if(!SEC.name&&v('an2').length<2)return bad('an2','Enter your artist name',smsg);
@@ -658,7 +671,7 @@ function fillDash(){const a=ART,h=new Date().getHours();$('#hg').textContent=`${
  const pb=$('#pbn');pb.style.setProperty('--ar',a.banner_ratio||'3/1');pb.style.background=a.banner_url?`url('${a.banner_url}') center/cover`:'';pb.textContent=a.banner_url?'':'Verified Blastr Artist';
  const pv=$('#pav');pv.style.background=a.avatar_url?`url('${a.avatar_url}') center/cover`:'';pv.textContent=a.avatar_url?'':a.name[0].toUpperCase();
  $('#pnm').textContent=a.name;$('#pvf').textContent=a.verified?'✔ VERIFIED':'UNVERIFIED';$('#pgn').textContent=a.genre||'';$('#pbio').textContent=a.bio||'Add your story so fans can find you.';fillEdit();syncMirror();loadSongs();loadSub();liveInit()}
-async function loadSongs(){const tb=$('#tb');try{const r=await API(`/rest/v1/tracks?select=*&artist_id=eq.${ART.id}&order=id.desc&limit=100`);SONGN=r.length;renderBadges();renderNoData();
+async function loadSongs(){const tb=$('#tb');try{const r=await API(`/rest/v1/tracks?select=*&artist_id=eq.${ART.id}&order=id.desc&limit=100`);SONGN=r.length;renderBadges();renderNoData();renderNotifs();
  tb.innerHTML=r.length?r.map(t=>`<tr><td><span class="cov" style="background:url('${esc(t.cover_url)}') center/cover,linear-gradient(135deg,#8b3dff,#ff3b4e)"></span>${esc(t.title)}</td><td>${(t.plays||0).toLocaleString()}</td><td>${(t.likes_count||0).toLocaleString()}</td><td>${(t.views_count||0).toLocaleString()}</td><td><span class="tag">${esc((t.status||'live').toUpperCase())}</span></td></tr>`).join(''):'<tr><td colspan="5" style="text-align:center;padding:30px;color:#fffa">No songs yet · <a style="color:var(--y);cursor:pointer" onclick="nav(\'pub\')">publish your first</a></td></tr>'}
  catch(e){tb.innerHTML=`<tr><td colspan="5" style="color:#ff6b7a">${esc(e.message)}</td></tr>`}}
 const dz=(id,acc,key,cb)=>{const e=$(id),set=f=>{FL[key]=f;cb(f)};e.onclick=()=>pick(acc,set);e.ondragover=ev=>{ev.preventDefault();e.style.borderColor='var(--y)'};e.ondragleave=()=>e.style.borderColor='';e.ondrop=ev=>{ev.preventDefault();e.style.borderColor='';ev.dataTransfer.files[0]&&set(ev.dataTransfer.files[0])}};
@@ -700,12 +713,12 @@ async function saveProfile(){const b=$('#ep-save'),m=$('#ep-msg');b.disabled=tru
   fillDash();toast('✅ Profile updated')}
  catch(e){m.style.color='#ff6b7a';m.textContent=e.message}finally{b.disabled=false;b.textContent='Save changes'}}
 // ===== v7 · billing demo, polish =====
-const PL=[{id:'basic',n:'Basic',ic:'🎤',tag:'Your first stage',m:6,y:60,f:['10 songs','Artist page + Blastr search listing','Profile banner & bio','30-day analytics','ZEN lyric display','Shareable song links','Milestone badges','Email support']},
- {id:'standard',n:'Standard',ic:'⚡',tag:'Go pro. Get noticed.',m:15,y:150,hot:1,f:['Unlimited songs','✔ Verified badge + search priority','Full analytics · audience, countries, heatmap','Release scheduler & calendar','Theatre Mode banners','Lyric sync editor','Featured music video','2 Boost credits / month','48h support']},
- {id:'vip',n:'VIP',ic:'👑',tag:'Headline energy',m:30,y:300,f:['Everything in Standard','Home & Artist Era spotlight','Sponsored ad slot on Blastr','6 Boost credits / month','Collab & split sheets','Team roles (up to 5)','Pre-save & countdown pages','CSV exports & genre benchmarks','Custom artist URL · 3 profiles','24h priority support + early access']}];
-const BP=[['⚡','Spark','1 boost',2],['🚀','Rocket','5 boosts',8],['🌟','Supernova','15 boosts',20]];
+const PL=[{id:'basic',n:'Basic',ic:'🎤',tag:'Your first stage',m:750,y:7500,f:['10 songs','Artist page + Blastr search listing','Profile banner & bio','30-day analytics','ZEN lyric display','Shareable song links','Milestone badges','Email support']},
+ {id:'standard',n:'Standard',ic:'⚡',tag:'Go pro. Get noticed.',m:1500,y:15000,hot:1,f:['Unlimited songs','✔ Verified badge + search priority','Full analytics · audience, countries, heatmap','Release scheduler & calendar','Theatre Mode banners','Lyric sync editor','Featured music video','2 Boost credits / month','48h support']},
+ {id:'vip',n:'VIP',ic:'👑',tag:'Headline energy',m:4000,y:40000,f:['Everything in Standard','Home & Artist Era spotlight','Sponsored ad slot on Blastr','6 Boost credits / month','Collab & split sheets','Team roles (up to 5)','Pre-save & countdown pages','CSV exports & genre benchmarks','Custom artist URL · 3 profiles','24h priority support + early access']}];
+const BP=[['⚡','Spark','1 boost',250],['🚀','Rocket','5 boosts',1000],['🌟','Supernova','15 boosts',2500]];
 let BIL='m',CO={},SUB=null;
-const money=n=>'$'+(Number.isInteger(n)?n:n.toFixed(2));
+const money=n=>'KES '+Math.round(n).toLocaleString('en');
 const trialLeft=()=>SUB&&SUB.status=='trialing'?Math.ceil((new Date(SUB.trial_ends_at)-Date.now())/864e5):null;
 const locked=()=>!!SUB&&SUB.status!='active'&&(SUB.status!='trialing'||new Date(SUB.trial_ends_at)<=Date.now());
 async function loadSub(){const u=SES.user.id;try{SUB=(await API(`/rest/v1/artist_subscriptions?select=*&user_id=eq.${u}`))[0]||null}catch(e){SUB=null}
@@ -717,7 +730,7 @@ function renderBilling(){const b=$('#trialbar'),s=SUB;if(!s)return;const pl=s.st
  if(pl){b.className='trial';b.innerHTML=`💎 <b>${pl.n} plan</b> active · ${s.billing=='y'?'annual':'monthly'} · renews ${new Date(s.period_end).toLocaleDateString('en',{month:'short',day:'numeric'})} <span class="note" style="margin:0">(demo)</span>`}
  else if(lk){b.className='trial red';b.innerHTML='🔒 <b>Your 5-day trial has ended.</b> Songs stay live for 30 days · choose a plan to unlock your dashboard. <button class="soc" onclick="nav(\'plans\')">Choose a plan</button>'}
  else{b.className='trial';b.innerHTML=`🎁 <b>Business trial</b> · <b>${left} day${left==1?'':'s'}</b> left <span class="tprog"><i style="width:${Math.max(4,left/5*100)}%"></i></span> <button class="soc" onclick="nav('plans')">Choose a plan</button>`}
- renderPlans();if(lk)nav('plans')}
+ renderPlans();renderNotifs();if(lk)nav('plans')}
 {const _n=nav;nav=function(v){if(locked()&&v!='plans'){toast('🔒 Choose a plan to unlock your dashboard');v='plans'}_n(v)}}
 // tilt / confetti / counters
 const tilt=el=>{el.addEventListener('mousemove',e=>{const r=el.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;el.style.transform=`perspective(700px) rotateY(${x*8}deg) rotateX(${-y*8}deg) translateY(-4px)`});el.addEventListener('mouseleave',()=>el.style.transform='')};
@@ -735,7 +748,7 @@ $('#dash .main').insertAdjacentHTML('beforeend',`<div class="view" id="v-plans">
 <div class="bil"><span id="bm" class="on">Monthly</span><button class="sw2" id="bt"><i></i></button><span id="by">Annual <em>2 months free</em></span></div><div class="pgrid" id="pgrid"></div>
 <div class="sec"><h3>⚡ Boost packs</h3><span class="tag">pay as you go</span></div><div class="grid g3" id="bpk"></div>
 <div class="c spons"><span style="font-size:28px">🌱</span><div><b>Rising Artist Sponsorship</b><div class="note">Emerging artists can apply for a sponsored year of Standard.</div></div><button class="soc" id="spb">Apply</button></div>
-<p class="note" style="text-align:center;margin-top:18px">Demo prices &amp; checkout · Paystack (cards + M-PESA) coming soon</p></div>`);
+<p class="note" style="text-align:center;margin-top:18px">Secured by Paystack · M-PESA &amp; cards</p></div>`);
 $('#bt').onclick=()=>{BIL=BIL=='m'?'y':'m';$('#bt').classList.toggle('y',BIL=='y');$('#bm').classList.toggle('on',BIL=='m');$('#by').classList.toggle('on',BIL=='y');renderPlans()};
 $('#spb').onclick=()=>toast('🌱 Application received (demo)');
 $('#bpk').innerHTML=BP.map((b,i)=>`<div class="c ac" data-b="${i}"><div class="ic">${b[0]}</div><h3>${b[1]}</h3><p>${b[2]}</p><div class="up2" style="margin-top:8px">${money(b[3])}</div></div>`).join('');
@@ -814,7 +827,10 @@ var SONGN=0;const WT={like:3,view:6,follow:3},PUB=12,nfmt=n=>(+n||0).toLocaleStr
 let AVG=null,liveOn=0;
 const M=()=>({f:ART.followers_count||0,l:ART.likes_count||0,v:ART.views_count||0,sc:ART.score||0});
 const ago=t=>{const s=(Date.now()-new Date(t))/1000;return s<60?'just now':s<3600?Math.floor(s/60)+'m':s<86400?Math.floor(s/3600)+'h':Math.floor(s/86400)+'d'};
-function animNum(el,to){const from=+el.dataset.v||0;el.dataset.v=to;if(from===to){el.textContent=nfmt(to);return}const t0=performance.now(),f=n=>{const p=Math.min(1,(n-t0)/700);el.textContent=nfmt(Math.round(from+(to-from)*(1-Math.pow(1-p,3))));p<1&&requestAnimationFrame(f)};requestAnimationFrame(f);el.classList.remove('tick');void el.offsetWidth;el.classList.add('tick')}
+const LOW=(navigator.hardwareConcurrency||8)<=4||(navigator.deviceMemory||8)<=3;
+function animNum(el,to){cancelAnimationFrame(+el.dataset.raf||0);const from=+el.dataset.shown||0;el.dataset.v=to;const fin=()=>{el.textContent=nfmt(to);el.dataset.shown=to};
+ if(from===to||document.hidden||LOW){fin();return}const t0=performance.now(),f=n=>{const p=Math.min(1,Math.max(0,(n-t0)/600)),v=Math.round(from+(to-from)*(1-Math.pow(1-p,3)));el.textContent=nfmt(v);el.dataset.shown=v;if(p<1)el.dataset.raf=requestAnimationFrame(f);else fin()};
+ el.dataset.raf=requestAnimationFrame(f);setTimeout(()=>{if(+el.dataset.v===to)fin()},900);el.classList.remove('tick');void el.offsetWidth;el.classList.add('tick')}
 $('#stats').insertAdjacentHTML('afterend','<div class="c bars" id="pubcard" style="margin-top:14px"><h3>👀 How fans see you</h3><p class="note">Your dashboard shows exact numbers. Fans see a count only once it reaches 12. Your Blastr Score is always public.</p><div class="pchips" id="pubchips"></div><div id="pubbars"></div></div>');
 function renderStats(){const m=M(),st=$('#stats');
  if(!st.dataset.live){st.dataset.live=1;st.innerHTML=[['👥','Followers','f'],['❤️','Likes','l'],['👁','Views','v']].map(t=>`<div class="c st" data-k="${t[2]}"><small>${t[0]} ${t[1]}</small><b data-v="0">0</b><span class="sub2"></span><div class="mb"><i></i></div></div>`).join('')+`<div class="c st" data-k="sc"><small>⭐ Blastr Score</small><b data-v="0">0</b><span class="sub2">${WT.like} pts / like · ${WT.view} / view · ${WT.follow} / follow · public</span></div><div class="c st" data-k="av"><small>🎧 Avg listen</small><b>—</b><span class="sub2"></span></div>`;$$('#stats .st').forEach(tilt)}
@@ -830,17 +846,186 @@ function renderBadges(){const m=M(),top=Math.max(m.f,m.l,m.v),B=[['🌱','First 
  $('#bdg').innerHTML=B.map(b=>`<div class="c bdg ${b[2]>=1?'ul':b[2]==0?'lk':''}"><div class="rg"><svg viewBox="0 0 70 70"><circle cx="35" cy="35" r="30" fill="none" stroke="#fff2" stroke-width="5"/><circle cx="35" cy="35" r="30" fill="none" stroke="${b[2]>=1?'var(--y)':'var(--g)'}" stroke-width="5" stroke-linecap="round" stroke-dasharray="188.5" stroke-dashoffset="${188.5*(1-b[2])}" transform="rotate(-90 35 35)" style="animation:rg 1.6s"/></svg><span class="em">${b[0]}</span></div><b>${b[1]}</b><small>${b[3]}</small></div>`).join('');$$('#bdg .bdg').forEach(tilt)}
 function renderNoData(){const m=M(),empty=!(m.f||m.l||m.v)&&!SONGN&&!(AVG&&AVG.listens);
  [$('#ch1').closest('.c'),...$$('#v-ana .c')].forEach(c=>{if(!c)return;c.classList.toggle('nodata',empty);const o=[...c.children].find(x=>x.classList.contains('ndo'));if(empty&&!o)c.insertAdjacentHTML('beforeend','<div class="ndo"><b>No data yet</b><small>Publish a song · stats appear as fans engage</small></div>');if(!empty&&o)o.remove()})}
-async function loadFeed(){try{const r=await API(`/rest/v1/artist_events?select=*&owner_id=eq.${SES.user.id}&order=created_at.desc&limit=7`),IC={follow:'👤',like:'❤️',view:'👁',listen:'🎧'};
- $('#feed').innerHTML=r.length?r.map(e=>`<div class="fd"><span class="e">${IC[e.kind]||'✨'}</span><span>${esc(e.body||e.kind)}</span><small>${ago(e.created_at)}</small></div>`).join(''):'<div class="note" style="padding:18px 0">No activity yet · new follows and likes appear here live.</div>'}catch(e){}}
+async function loadFeed(){try{EV=await API(`/rest/v1/artist_events?select=*&owner_id=eq.${SES.user.id}&order=created_at.desc&limit=20`);if(!Array.isArray(EV))EV=[];await loadNames();
+ $('#feed').innerHTML=EV.length?EV.slice(0,7).map(e=>`<div class="fd"><span class="e">${evIcon[e.kind]||'✨'}</span><span>${evText(e)}</span><small>${ago(e.created_at)}</small></div>`).join(''):'<div class="note" style="padding:18px 0">No activity yet · new follows and likes appear here live.</div>';renderNotifs()}catch(e){}}
 async function loadAvg(){try{AVG=await API('/rest/v1/rpc/my_listen_stats',{method:'POST',body:{}})}catch(e){AVG=null}renderStats();renderNoData()}
 async function pollStats(){if(!ART||document.hidden||!$('#dash').classList.contains('on'))return;
  try{const r=(await API(`/rest/v1/artists?select=followers_count,likes_count,views_count,score,founding&id=eq.${ART.id}`))[0];if(!r)return;const o=M();Object.assign(ART,r);const n=M();
   if(n.f>o.f)toast(`🎉 New follower! ${nfmt(n.f)} total`);if(n.l>o.l)toast(`❤️ New like · ${nfmt(n.l)} total`);
   if((o.f<PUB&&n.f>=PUB)||(o.l<PUB&&n.l>=PUB)||(o.v<PUB&&n.v>=PUB)){toast('🔓 Public counts unlocked!');confetti()}
-  if(n.f!==o.f||n.l!==o.l||n.v!==o.v||n.sc!==o.sc){renderStats();renderPub();renderBadges();renderNoData();loadFeed()}
+  renderStats();if(n.f!==o.f||n.l!==o.l||n.v!==o.v||n.sc!==o.sc){renderPub();renderBadges();renderNoData();loadFeed()}
   if($('#v-songs').classList.contains('on'))loadSongs()}catch(e){}}
-function liveInit(){renderStats();renderPub();renderBadges();renderNoData();loadFeed();loadAvg();if(!liveOn){liveOn=1;setInterval(pollStats,5000);setInterval(loadAvg,30000)}}
+function liveInit(){renderStats();renderPub();renderBadges();renderNoData();loadFeed();loadAvg();if(!liveOn){liveOn=1;setInterval(pollStats,5000);setInterval(loadAvg,30000);setInterval(loadFeed,30000);document.addEventListener('visibilitychange',()=>{if(!document.hidden&&ART){renderStats();renderPub();loadFeed()}})}renderNotifs()}
+// ===== v11 · boot guard + organic notifications =====
+(()=>{const M2=['TUNING IN…','SYNCING YOUR STATS…','WARMING UP THE STAGE…','ALMOST THERE…'];let i=0;const t=setInterval(()=>{const b=document.getElementById('bst');if(!b){clearInterval(t);return}b.textContent=M2[++i%M2.length]},1250)})();
+function bootDone(now){const el=$('#boot');if(!el||el.dataset.bd)return;el.dataset.bd=1;const go=()=>{el.classList.add('out');$('#dash').classList.add('reveal');setTimeout(()=>el.remove(),700);setTimeout(()=>$('#dash').classList.remove('reveal'),1200)};if(now)go();else setTimeout(go,Math.max(0,5000-performance.now()))}
+let EV=[];const NAMES={},evIcon={follow:'👤',like:'❤️',view:'👁',listen:'🎧'},agoT=t=>{const a=ago(t);return a=='just now'?a:a+' ago'};
+const evText=e=>{const n=NAMES[e.actor_id],b=e.body||e.kind;if(e.kind=='follow')return `<b>${esc(n||'Someone')}</b> followed you`;if(e.kind=='like'&&n)return esc(b).replace('Someone',`<b>${esc(n)}</b>`);return esc(b)};
+async function loadNames(){const ids=[...new Set(EV.map(e=>e.actor_id).filter(x=>x&&!(x in NAMES)))];if(!ids.length)return;try{const r=await API(`/rest/v1/profiles?select=id,username&id=in.(${ids.join(',')})`);(Array.isArray(r)?r:[]).forEach(p=>NAMES[p.id]=p.username)}catch(e){}ids.forEach(i=>{if(!(i in NAMES))NAMES[i]=null})}
+const nseen=()=>{try{return new Set(JSON.parse(ls('bfa_ns_'+SES.user.id)||'[]'))}catch(e){return new Set()}};
+function sysNotes(){const m=M(),a=ART,o=[],add=(id,ic,txt,go,t)=>o.push({id,ic,txt,go,t}),top=Math.max(m.f,m.l,m.v);
+ add('welcome','🎉',`Welcome to Blastr Studios, <b>${esc(a.name)}</b>`,'home',a.studio_onboarded_at?agoT(a.studio_onboarded_at):'');
+ if(SUB&&SUB.status=='trialing'){const l=trialLeft();if(l>0)add('trial'+l,'🎁',l==1?'Last day of your business trial · choose a plan to keep publishing':`${l} days left in your business trial`,'plans')}
+ if(typeof locked=='function'&&locked())add('trial-end','🔒','Your trial has ended · choose a plan to unlock your dashboard','plans');
+ if(SUB&&SUB.status=='active'&&SUB.plan)add('plan-'+SUB.plan,'💎',`Your <b>${esc(SUB.plan)}</b> plan is active`,'plans');
+ if(!SONGN)add('t-song','🎵','Publish your first song to start collecting stats','pub');
+ if(!a.avatar_url)add('t-av','📷','Add a profile picture so fans recognise you','prof');
+ if(!a.banner_url)add('t-bn','🖼️','Add a banner to make your profile stand out','prof');
+ if(!a.bio)add('t-bio','✍️','Tell fans your story · add a short bio','prof');
+ if(!a.video_url)add('t-vid','🎬','Link a music video to feature on your Blastr page','prof');
+ if(m.f>0&&m.f<PUB)add('n-f'+m.f,'👥',`${PUB-m.f} more follower${PUB-m.f==1?'':'s'} until your follower count goes public`,'home');
+ if(top>=PUB)add('pub-on','🔓','Your public counts are live on your Blastr profile','home');
+ if(a.founding)add('founding','🏆','You are a Founding Artist · that badge is yours for good','home');
+ return o}
+function ringBell(){const b=$('#bell');if(!b)return;b.classList.remove('ring');void b.offsetWidth;b.classList.add('ring')}
+function renderNotifs(){if(!ART||!SES||!$('#np'))return;const seen=nseen(),sys=sysNotes(),tip=s=>/^(t-|n-f)/.test(s.id),un=EV.filter(e=>!e.read).length+sys.filter(s=>!tip(s)&&!seen.has(s.id)).length,d=$('#bdot');
+ d.textContent=un>9?'9+':un;d.style.display=un?'':'none';const pv=+d.dataset.n||0;d.dataset.n=un;if(un>pv&&pv>=0&&d.dataset.init)ringBell();d.dataset.init=1;
+ $('#np').innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><h3>Notifications</h3><a id="mr" style="font-size:11px;color:var(--y);cursor:pointer">Mark all read</a></div>`
+  +EV.slice(0,12).map(e=>`<div class="n2${e.read?'':' u'}"><span class="e">${evIcon[e.kind]||'✨'}</span><div>${evText(e)}<small>${agoT(e.created_at)}</small></div></div>`).join('')
+  +(sys.length?`<div class="note" style="margin:10px 0 4px;letter-spacing:2px">FOR YOU</div>`+sys.slice(0,8).map(s=>`<div class="n2 go${seen.has(s.id)||tip(s)?'':' u'}" data-go="${s.go}"><span class="e">${s.ic}</span><div>${s.txt}${s.t?`<small>${s.t}</small>`:''}</div></div>`).join(''):'')
+  +(!EV.length&&!sys.length?'<div class="note">All caught up ✨</div>':'');
+ $('#mr').onclick=markAllRead;$$('#np .n2.go').forEach(n=>n.onclick=()=>{nav(n.dataset.go);$$('.pop').forEach(p=>p.classList.remove('on'))})}
+async function markAllRead(){try{ls('bfa_ns_'+SES.user.id,JSON.stringify(sysNotes().map(s=>s.id)))}catch(e){}EV.forEach(e=>e.read=true);renderNotifs();try{await API(`/rest/v1/artist_events?owner_id=eq.${SES.user.id}&read=eq.false`,{method:'PATCH',body:{read:true}})}catch(e){}}
+{const _n3=nav;nav=function(v){_n3(v);if(v=='home'&&ART){renderStats();renderPub()}}}
 // ---- boot: restore session
 (async()=>{try{if(SES){SES.user=await API('/auth/v1/user');ls(sk(),JSON.stringify(SES));await route(null);if(!$('#authSec').classList.contains('hide'))fin()}}
- catch(e){clearSess()}finally{BOOTING=false;$('#boot')&&$('#boot').remove();ping()}})();
+ catch(e){clearSess();bootDone(true)}finally{BOOTING=false;bootDone(!$('#dash').classList.contains('on'));ping()}})();
+</script><style>#ypay{position:fixed;inset:0;z-index:9000;overflow:auto;display:flex;background:radial-gradient(120% 90% at 50% 0,#1b0f3a,#07050d);opacity:0;transition:opacity .5s;--a:#8b3dff;--b:#5a1fd1;--c:#b05cff}#ypay.on{opacity:1}
+#ypay .bpa{position:fixed;inset:-25%;background:conic-gradient(#8b3dff33,#00c6ff22,#ffd40022,#19e68c22,#8b3dff33);filter:blur(70px);animation:paspin 30s linear infinite;pointer-events:none}@keyframes paspin{to{transform:rotate(1turn)}}
+.bpw{position:relative;margin:auto;width:min(1060px,100%);padding:26px 16px;text-align:center}.bpw h2{font-size:clamp(24px,4.6vw,40px)}.bpw .sub{margin:6px 0 22px;opacity:.7}
+#ypyx{position:fixed;top:14px;right:16px;z-index:2;width:40px;height:40px;border-radius:50%;border:1px solid var(--bd);background:#0008;cursor:pointer}
+.pg{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:18px}
+.pk{position:relative;text-align:left;padding:22px 18px;border-radius:22px;background:linear-gradient(160deg,#ffffff16,#ffffff06);border:1px solid var(--bd);backdrop-filter:blur(14px);cursor:pointer;transition:border-color .3s,box-shadow .3s;animation:pfl 5s ease-in-out infinite,in .6s backwards;animation-delay:calc(var(--i)*.6s),calc(var(--i)*.1s)}
+@keyframes pfl{50%{transform:translateY(-10px)}}.pk:hover{animation-play-state:paused;border-color:var(--c);box-shadow:0 18px 60px color-mix(in srgb,var(--c) 45%,transparent)}
+.pk .pi{font-size:30px}.pk h3{margin:8px 0 2px;font-size:22px;color:var(--c)}.pk small{opacity:.65}.pp{font-size:28px;font-weight:800;margin:12px 0}.pp small{font-size:13px}
+.pk ul{list-style:none;font-size:13px;line-height:1.9;min-height:96px}.pk li:before{content:'✓ ';color:var(--c)}.pk .btn{background:linear-gradient(135deg,var(--a),var(--b));color:#fff}
+.pk .rb{position:absolute;top:12px;right:-6px;background:var(--y);color:#111;font-size:10px;font-weight:800;padding:3px 10px;border-radius:6px}
+.psk{margin-top:26px;background:0;border:0;opacity:.6;text-decoration:underline;cursor:pointer}.psk:hover{opacity:1}
+.p2{display:grid;grid-template-columns:1fr 1fr;gap:34px;align-items:center;text-align:left}@media(max-width:760px){.p2{grid-template-columns:1fr;gap:22px}}
+.cw{display:grid;place-items:center;gap:14px}
+.cc{width:min(370px,86vw);aspect-ratio:1.586;border-radius:20px;padding:20px;position:relative;overflow:hidden;color:#fff;background:linear-gradient(135deg,var(--a),var(--b));box-shadow:0 30px 70px color-mix(in srgb,var(--a) 50%,transparent),inset 0 0 0 1px #fff4;animation:pfl 5s ease-in-out infinite;transition:background .5s}
+.cc:after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,#fff6 48%,transparent 62%);transform:translateX(-130%);animation:shn 3.6s infinite}@keyframes shn{60%,100%{transform:translateX(130%)}}
+.cc .tp{display:flex;justify-content:space-between;font-weight:800;letter-spacing:2px;font-size:13px}.cc .cchip{width:46px;height:34px;border-radius:7px;margin:20px 0 10px;background:linear-gradient(135deg,#f6e7a9,#b8963c 55%,#f6e7a9)}
+.cc .nu{font-family:var(--mono);font-size:clamp(15px,4.6vw,20px);letter-spacing:3px}.cc .nu,.cc .nm{text-shadow:0 1px 0 #0007,0 -1px 0 #fff5}
+.cc .cbm{display:flex;justify-content:space-between;align-items:flex-end;margin-top:12px;font-size:9px;opacity:.9}.cc .nm{display:block;font-family:var(--mono);font-size:14px;letter-spacing:2px;margin-top:2px;max-width:220px;overflow:hidden;white-space:nowrap}
+.cc .vs{font:italic 800 24px/1 sans-serif;letter-spacing:1px}.cc .ho{position:absolute;right:20px;top:62px;width:34px;height:34px;border-radius:50%;background:conic-gradient(#fff8,#0ff6,#f0f6,#ff06,#fff8);opacity:.7}
+.pf2 h3{font-size:24px}.pq{font-size:30px;font-weight:800;color:var(--c);margin:4px 0 8px}.pq small{font-size:13px;opacity:.7}
+.fi{position:relative;margin-top:14px}.fi input{padding:20px 14px 8px;background:#0009;border-radius:14px;transition:.3s}.fi label{position:absolute;left:15px;top:16px;font-size:13px;opacity:.6;pointer-events:none;transition:.25s}
+.fi input:focus+label,.fi input:not(:placeholder-shown)+label{top:5px;font-size:10px;color:var(--c);opacity:1}
+.fi input:focus{border-color:var(--c);box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 22%,transparent),0 0 30px color-mix(in srgb,var(--c) 40%,transparent)}.fi input:not(:placeholder-shown):not(:focus){background:color-mix(in srgb,var(--c) 10%,#0009)}
+.fi i{position:absolute;left:14px;right:14px;bottom:0;height:2px;background:var(--c);transform:scaleX(0);transition:.4s;border-radius:2px}.fi input:focus~i{transform:scaleX(1)}
+#yptabs{margin:10px 0 0}#yppay{background:linear-gradient(135deg,var(--a),var(--b));color:#fff;box-shadow:0 10px 36px color-mix(in srgb,var(--a) 50%,transparent)}
+.pbk{margin-top:12px;background:0;border:0;opacity:.6;cursor:pointer}.pbk:hover{opacity:1}
+.pr{padding:60px 0}.rg{width:110px;height:110px;margin:auto;border-radius:50%;border:4px solid #fff2;border-top-color:var(--c);animation:rgs 1s linear infinite;box-shadow:0 0 50px color-mix(in srgb,var(--c) 40%,transparent)}@keyframes rgs{to{transform:rotate(1turn)}}
+.rs{width:110px;height:110px;margin:auto}.rs svg{width:100%;height:100%;overflow:visible}.rs circle,.rs path{fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:150;stroke-dashoffset:150;animation:dr .7s .1s forwards}.rs path{stroke-dasharray:50;stroke-dashoffset:50;animation-delay:.6s}
+.rs.ok svg{stroke:var(--g);filter:drop-shadow(0 0 14px var(--g))}.rs.no svg{stroke:var(--r);filter:drop-shadow(0 0 14px var(--r));animation:sk .5s .9s}@keyframes dr{to{stroke-dashoffset:0}}
+#yplog{position:fixed;left:8px;bottom:8px;z-index:9999;max-width:min(620px,96vw);max-height:42vh;overflow:auto;background:#000d;border:1px solid #fff3;border-radius:10px;padding:8px 10px;font:11px/1.6 var(--mono);white-space:pre-wrap}#yplog .g{color:#19e68c}#yplog .r{color:#ff6b7a}
+#v-plans .bil{display:none}
+
+.fi label{margin:0!important;line-height:1;text-transform:none!important;letter-spacing:0!important}#yptabs button.a{background:linear-gradient(135deg,var(--a),var(--b))!important;color:#fff!important}
+/* v13 · card glow + login restyle (Blastr colours, minimal) */
+.cc.go{animation:none;transform:scale(1.04) rotate(-1.5deg);box-shadow:0 0 90px color-mix(in srgb,var(--a) 70%,transparent),inset 0 0 0 1px #fff8;transition:.5s}
+#card .panel{background:radial-gradient(420px 220px at 100% 0,#8b3dff26,transparent 70%),radial-gradient(380px 240px at 0 100%,#19e68c18,transparent 70%),linear-gradient(180deg,#120c20f5,#090710fa)!important}
+#card .panel::before{height:3px!important;background:linear-gradient(90deg,var(--y),var(--r),var(--p),var(--g))!important}
+#card h2{font-size:26px;letter-spacing:-.5px;background:linear-gradient(90deg,#fff,var(--y));-webkit-background-clip:text;background-clip:text;color:transparent}
+#card .sub{color:#fff9;letter-spacing:1.5px}
+#card .tabs{background:#ffffff0d;border:1px solid #ffffff14;padding:3px}
+#card .tabs button{color:#fffc;font-size:12px;letter-spacing:.3px}
+#card .tabs .a{background:linear-gradient(135deg,var(--p),var(--r))!important;color:#fff;box-shadow:0 6px 20px #8b3dff44}
+#card label,#setup label{color:#fffa;font-size:10px;letter-spacing:1px}#card label b,#setup label b{color:var(--y)}
+#card input,#card select,#setup input,#setup select,#setup textarea{background:#ffffff0a;border:1px solid #ffffff1f;border-radius:12px}
+#card input:hover,#card select:hover,#setup input:hover,#setup select:hover{border-color:#ffffff40}
+#card input:focus,#card select:focus,#setup input:focus,#setup select:focus,#setup textarea:focus{border-color:var(--y);background:#ffd4000d;box-shadow:0 0 0 3px #ffd40020}
+#card .btn:not(.sec),#setup .btn:not(.sec){background:linear-gradient(110deg,var(--y),var(--r) 55%,var(--p))!important;color:#fff;letter-spacing:.3px;box-shadow:0 10px 30px #ff3b4e44;text-shadow:0 1px 0 #0003}
+#card .btn:not(.sec):hover,#setup .btn:not(.sec):hover{transform:translateY(-1px);box-shadow:0 14px 38px #ff3b4e66}
+#card .tn{background:linear-gradient(90deg,#19e68c14,#8b3dff14);border:1px solid #19e68c44}
+/* v14 receipts */
+.pl-m{--c:#19e68c;border-color:#19e68c88}
+#rcm{position:fixed;inset:0;z-index:9500;background:#000b;backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto}#rcm.hide{display:none}.rcb{width:min(400px,100%)}
+#rcm .rcp{position:relative;background:linear-gradient(180deg,#171028,#0c0916);border:1px solid var(--bd);border-radius:20px;padding:22px;overflow:hidden;animation:rcin .5s cubic-bezier(.2,.9,.3,1.2)}
+#rcm .rcp:before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,var(--y),var(--r),var(--p),var(--g))}
+#rcm .rtop{display:flex;justify-content:space-between;align-items:center}#rcm .rbr{font-weight:800;font-size:18px;letter-spacing:1px}#rcm .rbr em{font-style:normal;color:var(--y);font-size:12px;letter-spacing:0}#rcm .rsm{font:10px var(--mono);color:#fff8;letter-spacing:2px;text-transform:uppercase}
+#rcm .rst{color:var(--g);font-weight:800;font-size:12px;border:1.5px solid var(--g);border-radius:99px;padding:3px 10px}
+#rcm .ram{font-size:36px;font-weight:800;margin:16px 0 8px;background:linear-gradient(90deg,var(--y),var(--g));-webkit-background-clip:text;background-clip:text;color:transparent}
+#rcm .rr{display:flex;justify-content:space-between;gap:14px;font:11px var(--mono);padding:8px 0;border-top:1px dashed #fff3}#rcm .rr span{color:#fff8}#rcm .rr b{text-align:right;word-break:break-all;font-weight:400}
+#rcm .rv{font:10px var(--mono);color:#fff8;margin-top:12px}#rcm .rv b{color:#fff;letter-spacing:2px}#rcm .rfx{display:flex;align-items:center;gap:14px;margin-top:14px;font-size:11px;color:#fff9;line-height:1.5}
+.stp{width:96px;height:96px;flex:none;color:#4aa3ff;transform:rotate(-12deg);opacity:.92;animation:stmp .6s .35s both cubic-bezier(.2,1.3,.4,1);filter:drop-shadow(0 0 8px #4aa3ff55)}
+@keyframes stmp{from{transform:rotate(-12deg) scale(2.6);opacity:0}to{transform:rotate(-12deg) scale(1);opacity:.92}}@keyframes rcin{from{transform:translateY(30px);opacity:0}}
+.rca{display:flex;gap:10px}.rca .btn{margin-top:14px}
+.rcl .rci{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--bd);border-radius:14px;background:var(--card);margin-top:8px;cursor:pointer;font-size:13px}.rci small{display:block;font:10px var(--mono);opacity:.65;margin-top:2px}.rci b{white-space:nowrap}
+</style><script>(()=>{
+const KP=[{id:'minimal',n:'Minimal',ic:'🧪',tag:'Test plan',m:50,a:'#19e68c',b:'#0a7a55',test:1,f:['KES 50 test charge','Unlocks Basic features']},
+{id:'basic',n:'Basic',ic:'🎤',tag:'Your first stage',m:750,a:'#00c6ff',b:'#1a5cff'},
+{id:'standard',n:'Standard',ic:'⚡',tag:'Go pro. Get noticed.',m:1500,a:'#b05cff',b:'#5a1fd1',hot:1},
+{id:'vip',n:'VIP',ic:'👑',tag:'Headline energy',m:4000,a:'#ffd400',b:'#9a6a00'}];
+KP.forEach(k=>{k.f=k.f||PL.find(p=>p.id==k.id).f.slice(0,4)});
+const K=n=>'KES '+n.toLocaleString('en');let ST={},CX={},TEST=0,LG=[],iv;const isT=()=>((SES&&SES.user&&SES.user.email)||'').toLowerCase()=='adrian43@gmail.com';
+document.body.insertAdjacentHTML('beforeend',`<div id="ypay" class="hide"><div class="bpa"></div><button id="ypyx" class="hide">✕</button><div class="bpw">
+<div id="ypv1"><h2 id="yph2">Pick your stage 🎤</h2><p class="sub">Secure checkout by Paystack · M-PESA or card · cancel anytime</p><div class="pg" id="ypg"></div><button class="psk" id="ypsk">Skip for now · start my 5-day trial</button></div>
+<div id="ypv2" class="hide"><div class="p2"><div class="cw"><div class="cc"><div class="tp"><span id="ypcb">BLASTR</span><span>)))</span></div><div class="cchip"></div><i class="ho"></i><div class="nu">•••• •••• •••• 2026</div><div class="cbm"><div>CARD HOLDER<b class="nm" id="ypcn">YOUR NAME</b></div><div>VALID THRU<b class="nm" id="ypcx">12/29</b></div><div class="vs">VISA</div></div></div><p class="note">Your name is engraved live ✦</p></div>
+<div class="pf2"><h3 id="ypt"></h3><div class="pq" id="ypq"></div><div class="tabs" id="yptabs"><button class="a" data-m="mpesa">📱 M-PESA</button><button data-m="card">💳 Card</button></div>
+<div id="ypmm"><div class="fi"><input id="ypph" placeholder=" " inputmode="tel" autocomplete="tel"><label>M-PESA number · 07XX XXX XXX</label><i></i></div></div>
+<div id="ypmc" class="hide"><div class="fi"><input id="ypnm" placeholder=" " autocomplete="cc-name"><label>Name on card</label><i></i></div><p class="note">Card number &amp; CVV are entered securely in Paystack's window · tap Pay to continue.</p></div>
+<button class="btn" id="yppay"></button><button class="pbk" id="ypbk">← Change plan</button></div></div></div>
+<div id="ypv3" class="hide"><div class="pr"><div id="ypro"><div class="rg"></div></div><h2 id="yprt">Processing…</h2><p class="sub" id="yprs"></p><div id="yprb"></div></div></div></div></div><pre id="yplog" class="hide"></pre>`);
+const pg=$('#ypg'),P=$('#ypay');
+const lg=(w,s,ok,d)=>{LG.push(`<div class="${ok?'g':'r'}">${new Date().toISOString().slice(11,23)} ${ok?'✓':'✗'} [${w}] ${esc(s)}${d?' — '+esc(String(d)):''}</div>`);console[ok?'log':'warn']('[BPAY]',w,s,d||'');$('#yplog').innerHTML=LG.join('');$('#yplog').scrollTop=1e9};
+addEventListener('keydown',e=>{if(e.ctrlKey&&e.shiftKey&&e.code=='KeyL'){e.preventDefault();$('#yplog').classList.toggle('hide')}});
+const view=n=>[1,2,3].forEach(i=>$('#ypv'+i).classList.toggle('hide',i!=n));
+const col=k=>{P.style.setProperty('--a',k.a);P.style.setProperty('--b',k.b);P.style.setProperty('--c',k.a)};
+function list(){pg.innerHTML=KP.filter(k=>!k.test||isT()).map((k,i)=>`<div class="pk" data-p="${k.id}" style="--i:${i};--a:${k.a};--b:${k.b};--c:${k.a}"><span class="pi">${k.ic}</span>${k.hot?'<div class="rb">MOST POPULAR</div>':''}<h3>${k.n}</h3><small>${k.tag}</small><div class="pp">${K(k.m)}<small>/mo</small></div><ul>${k.f.map(f=>`<li>${f}</li>`).join('')}</ul><button class="btn">Choose ${k.n}</button></div>`).join('')}
+pg.onclick=e=>{const c=e.target.closest('[data-p]');c&&pick(c.dataset.p)};
+function pick(id){const k=ST.p=KP.find(x=>x.id==id);col(k);$('#ypt').textContent=k.n+' plan';$('#ypq').innerHTML=K(k.m)+'<small>/mo</small>';$('#yppay').textContent='Pay '+K(k.m);$('#ypcb').textContent='BLASTR · '+k.n.toUpperCase();
+ const d=new Date();$('#ypcx').textContent=String(d.getMonth()+1).padStart(2,'0')+'/'+String(d.getFullYear()+3).slice(2);
+ const n=((typeof PEND=='object'&&PEND.first)?PEND.first+' '+(PEND.second||''):(ART&&ART.name)||'').trim();$('#ypnm').value=n;card();view(2)}
+const card=()=>{$('#ypcn').textContent=($('#ypnm').value.trim()||'YOUR NAME').toUpperCase().slice(0,22)};$('#ypnm').oninput=card;
+$$('#yptabs button').forEach(b=>b.onclick=()=>{$$('#yptabs button').forEach(x=>x.classList.remove('a'));b.classList.add('a');$('#ypmm').classList.toggle('hide',b.dataset.m!='mpesa');$('#ypmc').classList.toggle('hide',b.dataset.m!='card')});
+$('#ypbk').onclick=()=>CX.plan?close():view(1);$('#ypyx').onclick=close;$('#ypsk').onclick=()=>{close();CX.skip&&CX.skip()};
+function open(c){CX=c;ST={};P.classList.remove('hide');requestAnimationFrame(()=>P.classList.add('on'));document.body.style.overflow='hidden';list();$('#ypsk').classList.toggle('hide',c.ctx!='signup');$('#ypyx').classList.toggle('hide',c.ctx=='signup');lg('client','checkout opened',true,c.ctx+(c.plan?' · '+c.plan:''));c.plan?pick(c.plan):view(1)}
+function close(){P.classList.remove('on');T(()=>P.classList.add('hide'),500);document.body.style.overflow=''}
+async function fn(b){const J=PROJ[PI],t0=Date.now();if(SES.exp&&SES.exp-Date.now()<9e4)await refresh().catch(()=>{});
+ try{const r=await fetch(J.url+'/functions/v1/paystack-pay',{method:'POST',headers:{apikey:J.key,Authorization:'Bearer '+SES.access_token,'Content-Type':'application/json'},body:JSON.stringify(b)}),j=await r.json().catch(()=>({error:'Non-JSON response (is paystack-pay deployed?)'}));
+  (j.trace||[]).forEach(x=>lg(x.w,x.s,x.ok,x.d));const ok=r.ok&&!j.error;lg('client','fn:'+b.action+' HTTP '+r.status,ok,(Date.now()-t0)+'ms'+(j.error?' · '+j.error:''));if(!ok)throw new Error(j.error||'HTTP '+r.status);return j}
+ catch(e){lg('client','fn:'+b.action+' failed',false,e.message);throw e}}
+const msgs=['Securing connection…','Contacting Paystack…','Waiting for confirmation…'];
+function busy(t){view(3);$('#ypro').innerHTML='<div class="rg"></div>';$('#yprt').textContent='Processing…';$('#yprb').innerHTML='';let i=0;$('#yprs').textContent=t||msgs[0];clearInterval(iv);if(!t)iv=setInterval(()=>$('#yprs').textContent=msgs[++i%3],1600)}
+async function poll(n){for(let i=0;i<n;i++){const r=await fn({action:'verify',reference:ST.ref});if(r.status=='success'){ST.rc=r.receipt||null;return}if(['failed','abandoned','reversed'].includes(r.status))throw new Error(r.message||'Payment '+r.status);await new Promise(o=>T(o,3e3))}throw new Error('Timed out waiting for confirmation')}
+$('#yppay').onclick=async()=>{const m=$('#yptabs .a').dataset.m,ph=$('#ypph').value.replace(/\D/g,''),bd=i=>{const e=$('#'+i);e.classList.add('shake');T(()=>e.classList.remove('shake'),450);e.focus()};
+ if(m=='mpesa'&&!/^(254|0)?[71]\d{8}$/.test(ph))return bd('pph');if(m=='card'&&$('#ypnm').value.trim().length<2)return bd('pnm');
+ if(m=='mpesa')busy();else{$('#yppay').disabled=true;$('#yppay').textContent='Opening secure window…';$('.cc').classList.add('go')}
+ try{
+  if(m=='mpesa'){const r=await fn({action:'charge',plan:ST.p.id,phone:ph});ST.ref=r.reference;busy('Check your phone · enter your M-PESA PIN');await poll(30)}
+  else{const r=await fn({action:'init',plan:ST.p.id});ST.ref=r.reference;if(typeof PaystackPop=='undefined')throw new Error('Paystack script blocked/offline');
+   await new Promise((ok,no)=>new PaystackPop().resumeTransaction(r.access_code,{onSuccess:ok,onCancel:()=>no(new Error('Payment window closed')),onError:e=>no(new Error((e&&e.message)||'Card error'))}));lg('paystack','popup success',true,ST.ref);busy();await poll(6)}
+  end(1)}catch(e){end(0,e.message)}};
+function end(ok,why){clearInterval(iv);$('.cc').classList.remove('go');$('#yppay').disabled=false;$('#yppay').textContent='Pay '+K(ST.p.m);$('#ypro').innerHTML=`<div class="rs ${ok?'ok':'no'}"><svg viewBox="0 0 52 52"><circle cx="26" cy="26" r="23"/><path d="${ok?'M15 27l8 8 14-16':'M17 17l18 18M35 17L17 35'}"/></svg></div>`;
+ $('#yprt').textContent=ok?'Transaction successful':'Transaction failed';$('#yprs').textContent=ok?'Welcome aboard · your receipt is ready 🧾':why;lg('client','result',!!ok,why||ST.ref);
+ if(ok){confetti();const u=SES.user.id;ls('bfa_plan_'+u,JSON.stringify({plan:ST.p.id=='minimal'?'basic':ST.p.id,billing:'m',end:Date.now()+30*864e5}));loadSub().catch(()=>{});if(ST.rc)rcSave(ST.rc);T(()=>{close();ST.rc&&showRc(ST.rc);CX.done&&CX.done()},2800)}
+ else $('#yprb').innerHTML='<button class="btn" id="yprr" style="max-width:260px;margin:20px auto 0">Try again</button>',$('#yprr').onclick=()=>view(2)}
+{const _g=go;go=function(id){if(id!='setup')return _g(id);const d=()=>_g(id),o=()=>open({ctx:'signup',done:d,skip:d});
+ API('/rest/v1/artist_subscriptions?select=status&user_id=eq.'+SES.user.id).then(r=>r[0]&&r[0].status=='active'?d():o()).catch(o)}}
+{const _o=openCo;openCo=function(o){if(o.boost||!o.plan)return _o(o);open({ctx:'dash',plan:o.plan.id})}}
+/* v14 receipts + settings + owner-only Minimal on Plans page */
+const PN={minimal:'Minimal (test)',basic:'Basic',standard:'Standard',vip:'VIP'},RK=()=>'bfa_rc_'+SES.user.id;let RC=[],RCUR=null;
+const rcLoc=()=>{try{return JSON.parse(ls(RK())||'[]')}catch(e){return[]}};
+const rcSave=r=>{const a=rcLoc().filter(x=>x.ref!=r.ref);a.unshift(r);ls(RK(),JSON.stringify(a.slice(0,50)))};
+async function rcAll(){let a=[];try{a=await API('/rest/v1/payment_receipts?select=*&order=paid_at.desc')||[]}catch(e){}const m=new Map();[...rcLoc(),...a].forEach(r=>m.set(r.ref,r));return[...m.values()].sort((x,y)=>new Date(y.paid_at)-new Date(x.paid_at))}
+const fd=(x,t)=>x?new Date(x).toLocaleString('en-GB',t?{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}:{day:'2-digit',month:'short',year:'numeric'}):'—';
+const stamp=r=>`<svg class="stp" viewBox="0 0 120 120"><defs><path id="sc" d="M60,60 m-44,0 a44,44 0 1,1 88,0 a44,44 0 1,1 -88,0"/></defs><circle cx="60" cy="60" r="56" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="60" cy="60" r="33" fill="none" stroke="currentColor" stroke-width="1.5"/><text font-size="9.5" font-weight="800" letter-spacing="2.2" fill="currentColor"><textPath href="#sc">XCLONE STUDIOS ★ XCLONE STUDIOS ★</textPath></text><text x="60" y="60" text-anchor="middle" font-size="19" font-weight="800" fill="currentColor">PAID</text><text x="60" y="75" text-anchor="middle" font-size="7.5" font-weight="700" fill="currentColor">${fd(r.paid_at).toUpperCase()}</text></svg>`;
+function rcHTML(r){const row=(a,b)=>`<div class="rr"><span>${a}</span><b>${esc(b)}</b></div>`;
+ return `<div class="rcp"><div class="rtop"><div><div class="rbr">BLASTR <em>for Artists</em></div><div class="rsm">Digital receipt</div></div><div class="rst">PAID ✓</div></div><div class="ram">${K(+r.amount_kes)}</div>${row('Receipt no.',r.receipt_no)}${row('Date',fd(r.paid_at,1))}${row('Plan',(PN[r.plan]||r.plan)+' · monthly')}${row('Method',r.method=='card'?(r.card||'Card'):'M-PESA')}${row('Valid until',fd(r.period_end))}${row('Billed to',r.email)}${row('Reference',r.ref)}<div class="rv">Verification code · <b>${esc(r.code)}</b></div><div class="rfx">${stamp(r)}<p>Thank you for backing your sound.<br>Issued by <b>Xclone Studios</b> · Blastr for Artists</p></div></div>`}
+const PCSS="body{font-family:system-ui,sans-serif;margin:0;padding:24px;background:#fff}.rcp{max-width:420px;margin:auto;border:1px solid #ddd;border-radius:14px;padding:24px;color:#111}.rtop{display:flex;justify-content:space-between;align-items:center}.rbr{font-weight:800;font-size:20px}.rbr em{font-style:normal;color:#8b3dff;font-size:13px}.rsm{font-size:11px;color:#666}.rst{color:#0a9d5c;font-weight:800;font-size:12px;border:1.5px solid #0a9d5c;border-radius:99px;padding:3px 10px}.ram{font-size:34px;font-weight:800;margin:18px 0}.rr{display:flex;justify-content:space-between;gap:14px;font-size:12px;padding:8px 0;border-top:1px dashed #ccc}.rr span{color:#666}.rr b{text-align:right;word-break:break-all}.rv{font-size:11px;color:#666;margin-top:12px}.rv b{font-family:monospace;color:#111;letter-spacing:2px}.rfx{display:flex;align-items:center;gap:14px;margin-top:14px;font-size:11px;color:#666}.stp{width:96px;height:96px;color:#1a5cff;transform:rotate(-12deg);flex:none}";
+function rcPrint(){const w=window.open('','_blank');if(!w)return toast('Allow pop-ups to print');w.document.write(`<title>Receipt ${esc(RCUR.receipt_no)}</title><style>${PCSS}</style>`+rcHTML(RCUR));w.document.close();setTimeout(()=>w.print(),350)}
+function showRc(r){let m=$('#rcm');if(!m){document.body.insertAdjacentHTML('beforeend','<div id="rcm" class="hide"><div class="rcb"><div id="rcc"></div><div class="rca"><button class="btn" id="rcp">Print / Save PDF</button><button class="btn" id="rcx" style="background:#ffffff14;color:#fff">Close</button></div></div></div>');m=$('#rcm');$('#rcx').onclick=()=>m.classList.add('hide');m.onclick=e=>{if(e.target==m)m.classList.add('hide')};$('#rcp').onclick=rcPrint}
+ RCUR=r;$('#rcc').innerHTML=rcHTML(r);m.classList.remove('hide')}
+async function renderRc(){if(!SES||!SES.user)return;RC=await rcAll();const h=RC.length?RC.map((r,i)=>`<div class="rci" data-rc="${i}"><div>🧾 <b style="white-space:normal">${esc(PN[r.plan]||r.plan)}</b><small>${esc(r.receipt_no)} · ${fd(r.paid_at)}</small></div><b>${K(+r.amount_kes)}</b></div>`).join(''):'<p class="note">No receipts yet · they appear here after every successful payment.</p>';
+ ['#rcl1','#rcl2'].forEach(s=>{const e=$(s);e&&(e.innerHTML=h)});const se=$('#setem');if(se)se.textContent='Signed in as '+SES.user.email;const sp=$('#setpl');if(sp)sp.textContent=SUB&&SUB.status=='active'?'Active plan: '+SUB.plan:'No active plan'}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-rc]');if(b&&RC[+b.dataset.rc])showRc(RC[+b.dataset.rc])});
+$('#v-plans .spons').insertAdjacentHTML('afterend','<div class="sec"><h3>🧾 Receipts</h3><span class="tag">saved</span></div><div class="rcl" id="rcl1"></div>');
+$('.me').insertAdjacentHTML('beforebegin','<button class="nv" data-v="set"><span>⚙️</span><span class="t">Settings</span></button>');$('.nv[data-v=set]').onclick=()=>nav('set');CM.push(['⚙️','Settings',()=>nav('set')]);
+$('#dash .main').insertAdjacentHTML('beforeend','<div class="view" id="v-set"><div class="hero" style="background:linear-gradient(120deg,#8b3dffcc,#00c6ffcc)"><h1>Settings ⚙️</h1><p>Your account, plan &amp; receipts</p></div><div class="c"><b>Account</b><div class="note" id="setem"></div><div class="note" id="setpl"></div></div><div class="sec"><h3>🧾 Receipts</h3><span class="tag">saved</span></div><div class="rcl" id="rcl2"></div></div>');
+{const _n4=nav;nav=function(v){_n4(v);if(v=='plans'||v=='set')renderRc()}}
+{const _rp=renderPlans;renderPlans=function(){if(isT()&&!PL.some(p=>p.id=='minimal'))PL.unshift({id:'minimal',n:'Minimal',ic:'🧪',tag:'Test plan · only you',m:50,y:600,f:['KES 50 test charge','Unlocks Basic features']});_rp()}}
+const s=document.createElement('script');s.src='https://js.paystack.co/v2/inline.js';document.head.append(s);
+})();
 </script></body></html>
