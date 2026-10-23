@@ -580,9 +580,9 @@ $('#v-ana').insertAdjacentHTML('beforeend',`<div class="c" style="margin-top:14p
 {const u=getComputedStyle(document.documentElement).getPropertyValue('--mkimg').trim().replace(/^url\(["']?|["']?\)$/g,''),k=document.createElement('link');k.rel='icon';k.href=u;document.head.append(k)}
 
 // ===== v5 · LIVE LOGIC (Supabase) =====
-const PROJ=[{url:'https://oapfpawypuodfvpzdffi.supabase.co',key:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9hcGZwYXd5cHVvZGZ2cHpkZmZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwMzk0MDUsImV4cCI6MjA4NzYxNTQwNX0.jrWLCX7pww2C_JzqMz0SMn1dyZ3HsQyVDfGWL2UkcX0'},{url:'https://zlkdlvovnclxqfwpafnc.supabase.co',key:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpsa2Rsdm92bmNseHFmd3BhZm5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU3Mzg4MzksImV4cCI6MjEwMTMxNDgzOX0.RORueyIi_SDvy3Ub1FL3FB5ETa8y-0syH-0azj3L3ac'}];
+const PROJ=[{label:'P3',url:'https://icpzknawzlrgdbgnpdcj.supabase.co',key:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImljcHprbmF3emxyZ2RiZ25wZGNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI2MDYwODQsImV4cCI6MjEwODE4MjA4NH0.YnWFy70BV8xoIEmsF1ygZsCbZ-JYDofrJ5p9zS9GO6M'},{label:'P2',retired:true,url:'https://zlkdlvovnclxqfwpafnc.supabase.co',key:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpsa2Rsdm92bmNseHFmd3BhZm5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU3Mzg4MzksImV4cCI6MjEwMTMxNDgzOX0.RORueyIi_SDvy3Ub1FL3FB5ETa8y-0syH-0azj3L3ac'}];
 const ls=(k,v)=>{try{return v===undefined?localStorage.getItem(k):localStorage.setItem(k,v)}catch(e){return null}},lsd=k=>{try{localStorage.removeItem(k)}catch(e){}};
-lsd('bfa_proj');let PI=1,SES=null,ART=null,PEND={};const FL={},sk=()=>'bfa_s'+PI;
+lsd('bfa_proj');let PI=0,SES=null,ART=null,PEND={};const FL={},sk=()=>'bfa_t'+PI;
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const loadSess=()=>{try{SES=JSON.parse(ls(sk()))}catch(e){SES=null}},clearSess=()=>{SES=null;lsd(sk())};
 const setSess=d=>{SES={access_token:d.access_token,refresh_token:d.refresh_token,user:d.user||SES?.user,exp:Date.now()+(d.expires_in||3600)*1000};ls(sk(),JSON.stringify(SES))};
@@ -596,7 +596,7 @@ async function ensureProfile(){try{const u=SES.user,r=await API(`/rest/v1/profil
 const getArtist=async()=>(await API(`/rest/v1/artists?select=*&owner_id=eq.${SES.user.id}&limit=1`))[0]||null;
 const msg=(t,ok)=>{const e=$('#authmsg');e.textContent=t;e.style.color=ok?'var(--g)':'#ff6b7a'};
 const socialSoon=()=>toast('Social sign-in is coming soon');
-async function ping(){const b=$('#pj');b.className='pj';b.textContent=`● P${PI+1} · checking…`;try{await API('/rest/v1/artists?select=owner_id&limit=1');b.className='pj ok';b.textContent=`● P${PI+1} · connected to the Blastr family`}catch(e){b.className='pj bad';b.textContent=/owner_id|column|exist/i.test(e.message)?`● P${PI+1} · master SQL missing here: run it in Supabase`:`● P${PI+1} · unreachable or over quota`}}
+async function ping(){const b=$('#pj');b.className='pj';b.textContent=`● ${PROJ[PI].label} · checking…`;try{await API('/rest/v1/artists?select=owner_id&limit=1');b.className='pj ok';b.textContent=`● ${PROJ[PI].label} · connected to the Blastr family`}catch(e){b.className='pj bad';b.textContent=/owner_id|column|exist/i.test(e.message)?`● ${PROJ[PI].label} · master SQL missing here: run it in Supabase`:`● ${PROJ[PI].label} · unreachable or over quota`}}
 $('#pj').onclick=e=>{if(e.shiftKey){PI=1-PI;loadSess()}ping()};
 // ---- login / sign up / secondary form
 const AUTH={mode:'old'},SEC={};
@@ -688,7 +688,7 @@ async function publishSong(){if(locked())return toast('🔒 Choose a plan to pub
  catch(e){m.textContent=e.message}finally{b.disabled=false;T(()=>pb.classList.add('hide'),900)}}
 // ---- family sync: mirror public rows to the standby project (like Blastr does)
 const STB=()=>PROJ[1-PI];
-function mirror(table,row){try{const t=STB();fetch(`${t.url}/rest/v1/${table}`,{method:'POST',headers:{apikey:t.key,Authorization:'Bearer '+t.key,'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify(row)}).catch(()=>{})}catch(e){}}
+function mirror(table,row){try{const t=STB();if(t.retired)return;fetch(`${t.url}/rest/v1/${table}`,{method:'POST',headers:{apikey:t.key,Authorization:'Bearer '+t.key,'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify(row)}).catch(()=>{})}catch(e){}}
 const pubArtist=a=>({id:a.id,name:a.name,bio:a.bio,avatar_url:a.avatar_url,banner_url:a.banner_url,verified:!!a.verified}),
  pubTrack=t=>({id:t.id,title:t.title,artist:t.artist,artist_id:t.artist_id,description:t.description,genre:t.genre,url:t.url,cover_url:t.cover_url,is_verified:!!t.is_verified});
 function syncMirror(){try{if(!sessionStorage.getItem('bfa_m'+ART.id)){mirror('artists',pubArtist(ART));sessionStorage.setItem('bfa_m'+ART.id,1)}}catch(e){}}
@@ -709,7 +709,7 @@ async function saveProfile(){const b=$('#ep-save'),m=$('#ep-msg');b.disabled=tru
   if(FL.eav)body.avatar_url=await upX(FL.eav,'avatar');if(FL.ebn)body.banner_url=await upX(FL.ebn,'banner');
   const r=await API(`/rest/v1/artists?id=eq.${ART.id}`,{method:'PATCH',headers:{Prefer:'return=representation'},body});
   ART=(r&&r[0])||{...ART,...body};delete FL.eav;delete FL.ebn;
-  try{const t=STB();fetch(`${t.url}/rest/v1/artists?id=eq.${ART.id}&name=eq.${encodeURIComponent(ART.name)}`,{method:'PATCH',headers:{apikey:t.key,Authorization:'Bearer '+t.key,'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({bio:ART.bio,avatar_url:ART.avatar_url,banner_url:ART.banner_url})}).catch(()=>{})}catch(e){}
+  try{const t=STB();if(t.retired)return;fetch(`${t.url}/rest/v1/artists?id=eq.${ART.id}&name=eq.${encodeURIComponent(ART.name)}`,{method:'PATCH',headers:{apikey:t.key,Authorization:'Bearer '+t.key,'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({bio:ART.bio,avatar_url:ART.avatar_url,banner_url:ART.banner_url})}).catch(()=>{})}catch(e){}
   fillDash();toast('✅ Profile updated')}
  catch(e){m.style.color='#ff6b7a';m.textContent=e.message}finally{b.disabled=false;b.textContent='Save changes'}}
 // ===== v7 · billing demo, polish =====
@@ -921,25 +921,8 @@ async function markAllRead(){try{ls('bfa_ns_'+SES.user.id,JSON.stringify(sysNote
 .rs.ok svg{stroke:var(--g);filter:drop-shadow(0 0 14px var(--g))}.rs.no svg{stroke:var(--r);filter:drop-shadow(0 0 14px var(--r));animation:sk .5s .9s}@keyframes dr{to{stroke-dashoffset:0}}
 #yplog{position:fixed;left:8px;bottom:8px;z-index:9999;max-width:min(620px,96vw);max-height:42vh;overflow:auto;background:#000d;border:1px solid #fff3;border-radius:10px;padding:8px 10px;font:11px/1.6 var(--mono);white-space:pre-wrap}#yplog .g{color:#19e68c}#yplog .r{color:#ff6b7a}
 #v-plans .bil{display:none}
-
 .fi label{margin:0!important;line-height:1;text-transform:none!important;letter-spacing:0!important}#yptabs button.a{background:linear-gradient(135deg,var(--a),var(--b))!important;color:#fff!important}
-/* v13 · card glow + login restyle (Blastr colours, minimal) */
 .cc.go{animation:none;transform:scale(1.04) rotate(-1.5deg);box-shadow:0 0 90px color-mix(in srgb,var(--a) 70%,transparent),inset 0 0 0 1px #fff8;transition:.5s}
-#card .panel{background:radial-gradient(420px 220px at 100% 0,#8b3dff26,transparent 70%),radial-gradient(380px 240px at 0 100%,#19e68c18,transparent 70%),linear-gradient(180deg,#120c20f5,#090710fa)!important}
-#card .panel::before{height:3px!important;background:linear-gradient(90deg,var(--y),var(--r),var(--p),var(--g))!important}
-#card h2{font-size:26px;letter-spacing:-.5px;background:linear-gradient(90deg,#fff,var(--y));-webkit-background-clip:text;background-clip:text;color:transparent}
-#card .sub{color:#fff9;letter-spacing:1.5px}
-#card .tabs{background:#ffffff0d;border:1px solid #ffffff14;padding:3px}
-#card .tabs button{color:#fffc;font-size:12px;letter-spacing:.3px}
-#card .tabs .a{background:linear-gradient(135deg,var(--p),var(--r))!important;color:#fff;box-shadow:0 6px 20px #8b3dff44}
-#card label,#setup label{color:#fffa;font-size:10px;letter-spacing:1px}#card label b,#setup label b{color:var(--y)}
-#card input,#card select,#setup input,#setup select,#setup textarea{background:#ffffff0a;border:1px solid #ffffff1f;border-radius:12px}
-#card input:hover,#card select:hover,#setup input:hover,#setup select:hover{border-color:#ffffff40}
-#card input:focus,#card select:focus,#setup input:focus,#setup select:focus,#setup textarea:focus{border-color:var(--y);background:#ffd4000d;box-shadow:0 0 0 3px #ffd40020}
-#card .btn:not(.sec),#setup .btn:not(.sec){background:linear-gradient(110deg,var(--y),var(--r) 55%,var(--p))!important;color:#fff;letter-spacing:.3px;box-shadow:0 10px 30px #ff3b4e44;text-shadow:0 1px 0 #0003}
-#card .btn:not(.sec):hover,#setup .btn:not(.sec):hover{transform:translateY(-1px);box-shadow:0 14px 38px #ff3b4e66}
-#card .tn{background:linear-gradient(90deg,#19e68c14,#8b3dff14);border:1px solid #19e68c44}
-/* v14 receipts */
 .pl-m{--c:#19e68c;border-color:#19e68c88}
 #rcm{position:fixed;inset:0;z-index:9500;background:#000b;backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto}#rcm.hide{display:none}.rcb{width:min(400px,100%)}
 #rcm .rcp{position:relative;background:linear-gradient(180deg,#171028,#0c0916);border:1px solid var(--bd);border-radius:20px;padding:22px;overflow:hidden;animation:rcin .5s cubic-bezier(.2,.9,.3,1.2)}
@@ -991,7 +974,7 @@ const msgs=['Securing connection…','Contacting Paystack…','Waiting for confi
 function busy(t){view(3);$('#ypro').innerHTML='<div class="rg"></div>';$('#yprt').textContent='Processing…';$('#yprb').innerHTML='';let i=0;$('#yprs').textContent=t||msgs[0];clearInterval(iv);if(!t)iv=setInterval(()=>$('#yprs').textContent=msgs[++i%3],1600)}
 async function poll(n){for(let i=0;i<n;i++){const r=await fn({action:'verify',reference:ST.ref});if(r.status=='success'){ST.rc=r.receipt||null;return}if(['failed','abandoned','reversed'].includes(r.status))throw new Error(r.message||'Payment '+r.status);await new Promise(o=>T(o,3e3))}throw new Error('Timed out waiting for confirmation')}
 $('#yppay').onclick=async()=>{const m=$('#yptabs .a').dataset.m,ph=$('#ypph').value.replace(/\D/g,''),bd=i=>{const e=$('#'+i);e.classList.add('shake');T(()=>e.classList.remove('shake'),450);e.focus()};
- if(m=='mpesa'&&!/^(254|0)?[71]\d{8}$/.test(ph))return bd('pph');if(m=='card'&&$('#ypnm').value.trim().length<2)return bd('pnm');
+ if(m=='mpesa'&&!/^(254|0)?[71]\d{8}$/.test(ph))return bd('ypph');if(m=='card'&&$('#ypnm').value.trim().length<2)return bd('ypnm');
  if(m=='mpesa')busy();else{$('#yppay').disabled=true;$('#yppay').textContent='Opening secure window…';$('.cc').classList.add('go')}
  try{
   if(m=='mpesa'){const r=await fn({action:'charge',plan:ST.p.id,phone:ph});ST.ref=r.reference;busy('Check your phone · enter your M-PESA PIN');await poll(30)}
@@ -999,17 +982,17 @@ $('#yppay').onclick=async()=>{const m=$('#yptabs .a').dataset.m,ph=$('#ypph').va
    await new Promise((ok,no)=>new PaystackPop().resumeTransaction(r.access_code,{onSuccess:ok,onCancel:()=>no(new Error('Payment window closed')),onError:e=>no(new Error((e&&e.message)||'Card error'))}));lg('paystack','popup success',true,ST.ref);busy();await poll(6)}
   end(1)}catch(e){end(0,e.message)}};
 function end(ok,why){clearInterval(iv);$('.cc').classList.remove('go');$('#yppay').disabled=false;$('#yppay').textContent='Pay '+K(ST.p.m);$('#ypro').innerHTML=`<div class="rs ${ok?'ok':'no'}"><svg viewBox="0 0 52 52"><circle cx="26" cy="26" r="23"/><path d="${ok?'M15 27l8 8 14-16':'M17 17l18 18M35 17L17 35'}"/></svg></div>`;
- $('#yprt').textContent=ok?'Transaction successful':'Transaction failed';$('#yprs').textContent=ok?'Welcome aboard · your receipt is ready 🧾':why;lg('client','result',!!ok,why||ST.ref);
+ $('#yprt').textContent=ok?'Transaction successful':'Transaction failed';$('#yprs').textContent=ok?'Welcome aboard 🎉':why;lg('client','result',!!ok,why||ST.ref);
  if(ok){confetti();const u=SES.user.id;ls('bfa_plan_'+u,JSON.stringify({plan:ST.p.id=='minimal'?'basic':ST.p.id,billing:'m',end:Date.now()+30*864e5}));loadSub().catch(()=>{});if(ST.rc)rcSave(ST.rc);T(()=>{close();ST.rc&&showRc(ST.rc);CX.done&&CX.done()},2800)}
  else $('#yprb').innerHTML='<button class="btn" id="yprr" style="max-width:260px;margin:20px auto 0">Try again</button>',$('#yprr').onclick=()=>view(2)}
 {const _g=go;go=function(id){if(id!='setup')return _g(id);const d=()=>_g(id),o=()=>open({ctx:'signup',done:d,skip:d});
- API('/rest/v1/artist_subscriptions?select=status&user_id=eq.'+SES.user.id).then(r=>r[0]&&r[0].status=='active'?d():o()).catch(o)}}
+ API('/rest/v1/artist_subscriptions?select=status&user_id='+'eq.'+SES.user.id).then(r=>r[0]&&r[0].status=='active'?d():o()).catch(o)}}
 {const _o=openCo;openCo=function(o){if(o.boost||!o.plan)return _o(o);open({ctx:'dash',plan:o.plan.id})}}
-/* v14 receipts + settings + owner-only Minimal on Plans page */
+/* receipts + settings + owner-only Minimal on Plans page */
 const PN={minimal:'Minimal (test)',basic:'Basic',standard:'Standard',vip:'VIP'},RK=()=>'bfa_rc_'+SES.user.id;let RC=[],RCUR=null;
 const rcLoc=()=>{try{return JSON.parse(ls(RK())||'[]')}catch(e){return[]}};
 const rcSave=r=>{const a=rcLoc().filter(x=>x.ref!=r.ref);a.unshift(r);ls(RK(),JSON.stringify(a.slice(0,50)))};
-async function rcAll(){let a=[];try{a=await API('/rest/v1/payment_receipts?select=*&order=paid_at.desc')||[]}catch(e){}const m=new Map();[...rcLoc(),...a].forEach(r=>m.set(r.ref,r));return[...m.values()].sort((x,y)=>new Date(y.paid_at)-new Date(x.paid_at))}
+async function rcAll(){let a=[];try{a=await API('/rest/v1/payment_receipts?select=*&order=paid_at.desc')||[]}catch(e){}if(!Array.isArray(a))a=[];const m=new Map();[...rcLoc(),...a].forEach(r=>m.set(r.ref,r));return[...m.values()].sort((x,y)=>new Date(y.paid_at)-new Date(x.paid_at))}
 const fd=(x,t)=>x?new Date(x).toLocaleString('en-GB',t?{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}:{day:'2-digit',month:'short',year:'numeric'}):'—';
 const stamp=r=>`<svg class="stp" viewBox="0 0 120 120"><defs><path id="sc" d="M60,60 m-44,0 a44,44 0 1,1 88,0 a44,44 0 1,1 -88,0"/></defs><circle cx="60" cy="60" r="56" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="60" cy="60" r="33" fill="none" stroke="currentColor" stroke-width="1.5"/><text font-size="9.5" font-weight="800" letter-spacing="2.2" fill="currentColor"><textPath href="#sc">XCLONE STUDIOS ★ XCLONE STUDIOS ★</textPath></text><text x="60" y="60" text-anchor="middle" font-size="19" font-weight="800" fill="currentColor">PAID</text><text x="60" y="75" text-anchor="middle" font-size="7.5" font-weight="700" fill="currentColor">${fd(r.paid_at).toUpperCase()}</text></svg>`;
 function rcHTML(r){const row=(a,b)=>`<div class="rr"><span>${a}</span><b>${esc(b)}</b></div>`;
