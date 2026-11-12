@@ -1381,4 +1381,98 @@ $$('[onclick*="skeleton"]').forEach(e=>{e.setAttribute('onclick',(e.getAttribute
 icQ();
 })();
 </script>
+<style id="bfaV16Css">
+.bfa-ex{display:grid;gap:10px;margin-top:4px}
+.bfa-ex .emo{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.bfa-ex .gl{width:100%;margin:6px 0 0;font:700 9px var(--mono);letter-spacing:2px;color:#fff9}
+.bfa-ex .pill{padding:6px 12px;border-radius:99px;border:1px solid var(--bd);background:#fff1;font:600 12px var(--font);cursor:pointer;transition:.2s;user-select:none}
+.bfa-ex .pill:hover{border-color:var(--y)}.bfa-ex .pill.on{background:var(--y);color:#111;border-color:transparent}
+.bfa-ex small{font:10px var(--mono);color:#fff9}
+</style>
+<script id="bfaV16Js">
+/* ═══ Blastr for Artists v16 · same publish pipeline as Blastr admins (Backblaze B2 via the Blastr media worker) ═══ */
+(()=>{
+'use strict';
+const B2={worker:'https://blastr-media.alexadrian-theoriginal.workers.dev',fn:'b2-artist'};
+const COUNTRIES='KE:Kenya,NG:Nigeria,ZA:South Africa,GH:Ghana,TZ:Tanzania,UG:Uganda,ET:Ethiopia,EG:Egypt,MA:Morocco,SN:Senegal,CD:DR Congo,US:United States,CA:Canada,MX:Mexico,JM:Jamaica,BR:Brazil,AR:Argentina,CO:Colombia,CU:Cuba,PR:Puerto Rico,GB:United Kingdom,IE:Ireland,FR:France,DE:Germany,ES:Spain,IT:Italy,PT:Portugal,SE:Sweden,NL:Netherlands,RU:Russia,UA:Ukraine,TR:Turkey,IL:Israel,SA:Saudi Arabia,AE:UAE,IR:Iran,IN:India,PK:Pakistan,BD:Bangladesh,LK:Sri Lanka,CN:China,JP:Japan,KR:South Korea,TH:Thailand,ID:Indonesia,PH:Philippines,VN:Vietnam,AU:Australia,NZ:New Zealand'.split(',').map(x=>x.split(':'));
+const LANGS='English,Swahili,Sheng,Hindi,Tamil,Telugu,Punjabi,Bengali,Urdu,Yoruba,Igbo,Hausa,Pidgin,Zulu,Xhosa,Amharic,Lingala,French,Spanish,Portuguese,Arabic,Korean,Japanese,Mandarin,Turkish,Russian,German,Italian,Instrumental,Other'.split(',');
+const EMO = [
+  {id:'happy',name:'Happy',class:'Joy'},{id:'joyful',name:'Joyful',class:'Joy'},{id:'euphoric',name:'Euphoric',class:'Joy'},{id:'playful',name:'Playful',class:'Joy'},{id:'danceable',name:'Danceable',class:'Joy'},{id:'hype',name:'Hype',class:'Joy'},
+  {id:'sad',name:'Sad',class:'Sad'},{id:'heartbroken',name:'Heartbroken',class:'Sad'},{id:'melancholic',name:'Melancholic',class:'Sad'},{id:'grieving',name:'Grieving',class:'Sad'},{id:'lonely',name:'Lonely',class:'Sad'},
+  {id:'chill',name:'Chill',class:'Calm'},{id:'relaxed',name:'Relaxed',class:'Calm'},{id:'dreamy',name:'Dreamy',class:'Calm'},{id:'peaceful',name:'Peaceful',class:'Calm'},
+  {id:'romantic',name:'Romantic',class:'Love'},{id:'sensual',name:'Sensual',class:'Love'},{id:'infatuated',name:'Infatuated',class:'Love'},{id:'devoted',name:'Devoted',class:'Love'},
+  {id:'angry',name:'Angry',class:'Intense'},{id:'aggressive',name:'Aggressive',class:'Intense'},{id:'rebellious',name:'Rebellious',class:'Intense'},{id:'fierce',name:'Fierce',class:'Intense'},
+  {id:'anxious',name:'Anxious',class:'Dark'},{id:'tense',name:'Tense',class:'Dark'},{id:'haunting',name:'Haunting',class:'Dark'},{id:'eerie',name:'Eerie',class:'Dark'},
+  {id:'confident',name:'Confident',class:'Empowered'},{id:'bold',name:'Bold',class:'Empowered'},{id:'triumphant',name:'Triumphant',class:'Empowered'},
+  {id:'nostalgic',name:'Nostalgic',class:'Reflective'},{id:'wistful',name:'Wistful',class:'Reflective'},{id:'introspective',name:'Introspective',class:'Reflective'}
+];
+const enc=encodeURIComponent,$q=s=>document.querySelector(s);
+const pubUrl=k=>B2.worker.replace(/\/+$/,'')+'/'+String(k).split('/').map(enc).join('/');
+const guessMime=f=>{if(f.type)return f.type;const e=(f.name||'').split('.').pop().toLowerCase();return({mp3:'audio/mpeg',m4a:'audio/mp4',wav:'audio/wav',flac:'audio/flac',ogg:'audio/ogg',aac:'audio/aac'})[e]||'audio/mpeg'};
+async function token(){try{if(SES&&SES.exp&&SES.exp-Date.now()<9e4)await refresh()}catch(e){}return SES&&SES.access_token}
+async function b2Call(action,payload,tk){
+  const J=PROJ[PI],t=tk||await token();if(!t)throw new Error('Please log in again.');
+  const r=await fetch(`${J.url}/functions/v1/${B2.fn}?action=${enc(action)}`,{method:'POST',credentials:'omit',headers:{apikey:J.key,Authorization:'Bearer '+t,'Content-Type':'application/json'},body:JSON.stringify(payload||{})});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok){const e=new Error(r.status===404?'Audio storage is not set up yet · deploy the b2-artist function':j.error==='not_allowed'?'This account is not allowed to upload songs yet (artist profile required)':(j.detail||j.error||'B2 call failed ('+r.status+')'));e.status=r.status;e.data=j;throw e}
+  return j}
+const xhr=(url,headers,body,onp)=>new Promise((ok,no)=>{const x=new XMLHttpRequest();x.open('POST',url);Object.keys(headers).forEach(k=>x.setRequestHeader(k,headers[k]));
+  x.upload.onprogress=e=>onp&&e.lengthComputable&&onp(e.loaded/e.total*100);
+  x.onload=()=>{let j={};try{j=JSON.parse(x.responseText)}catch(e){}ok({ok:x.status<300,status:x.status,j})};x.onerror=()=>no(new TypeError('Network error during upload'));x.send(body)});
+async function b2Upload(file,onp){
+  const mime=guessMime(file),me=(SES&&SES.user&&SES.user.id||'').replace(/-/g,'').slice(0,8);
+  const name=me+'_'+String(file.name||'audio').replace(/[^\w.\-]+/g,'_').slice(-80);
+  const key='songs/'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)+'-'+name;
+  const tk=await token();if(!tk)throw new Error('Please log in again before uploading.');
+  const J=PROJ[PI],t0=performance.now();
+  const done=mode=>{const sec=(performance.now()-t0)/1000,mb=file.size/1048576;window.bfaLastUpload={mode,mb:+mb.toFixed(2),sec:+sec.toFixed(2)};console.info('[B2 upload]',window.bfaLastUpload);return{url:pubUrl(key),key}};
+  // 1) straight from the browser to B2 (needs the bucket CORS rule + the "sign" action) · 2) automatic fallback to the edge function
+  if(!window.__bfaDirectOff){
+    try{
+      const s=await b2Call('sign',{key},tk);let sha='do_not_verify';
+      if(file.size<=12*1048576&&window.crypto&&crypto.subtle){const d=await crypto.subtle.digest('SHA-1',await file.arrayBuffer());sha=[...new Uint8Array(d)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+      const r=await xhr(s.uploadUrl,{Authorization:s.token,'X-Bz-File-Name':key.split('/').map(enc).join('/'),'Content-Type':mime,'X-Bz-Content-Sha1':sha},file,onp);
+      if(!r.ok)throw new Error(r.j.message||('B2 '+r.status));
+      return done('direct')}
+    catch(e){
+      if(e&&e.data&&(e.data.error==='not_allowed'||e.status===401||e.status===403||e.status===404))throw e;
+      console.warn('[B2] direct upload unavailable, using the edge function instead:',e&&e.message);
+      if(e instanceof TypeError||(e&&e.data&&e.data.error==='unknown_action'))window.__bfaDirectOff=true}}
+  const r=await xhr(`${J.url}/functions/v1/${B2.fn}?action=upload&key=${enc(key)}`,{apikey:J.key,Authorization:'Bearer '+tk,'Content-Type':mime},file,onp);
+  if(!r.ok)throw new Error(r.j.error==='not_allowed'?'This account is not allowed to upload songs yet (artist profile required)':(r.j.detail||r.j.error||'B2 upload failed ('+r.status+')'));
+  return done('edge')}
+const b2Delete=async key=>{try{await b2Call('delete',{key})}catch(e){}};
+/* audio → B2 · covers & images keep using Supabase storage, exactly like Blastr */
+const up1=window.upX;
+window.upX=async function(file,kind,onp){if(kind!=='audio')return up1.apply(this,arguments);const r=await b2Upload(file,onp);window.__bfaKey=r.key;return r.url};
+/* the tracks row gets the same fields as Blastr's admin form (country, language, emotions) */
+const api1=window.API;
+window.API=async function(path,o){o=o||{};const X=window.__bfaExtra,pub=!!X&&path==='/rest/v1/tracks'&&String(o.method||'GET').toUpperCase()==='POST';
+  if(pub)o=Object.assign({},o,{body:Object.assign({},o.body,{country:X.country,language:X.language})});
+  const r=await api1.call(this,path,o);
+  if(pub&&Array.isArray(r)&&r[0]){window.__bfaInserted=r[0].id;if(X.emotions.length)api1('/rest/v1/track_emotions',{method:'POST',headers:{Prefer:'return=minimal'},body:X.emotions.map(e=>({track_id:r[0].id,emotion_id:e}))}).catch(()=>{})}
+  return r};
+/* extra publish fields */
+function inject(){const b=$q('#pbtn');if(!b||$q('#pCountry'))return;
+  const groups={};EMO.forEach(e=>(groups[e.class]=groups[e.class]||[]).push(e));
+  b.insertAdjacentHTML('beforebegin',`<div class="bfa-ex"><div class="row"><div><label>Country of origin <b>*</b></label><select id="pCountry"><option value="">Select country…</option>${COUNTRIES.map(c=>`<option value="${c[0]}">${c[1]}</option>`).join('')}</select></div><div><label>Language <b>*</b></label><select id="pLang"><option value="">Select language…</option>${LANGS.map(l=>`<option>${l}</option>`).join('')}</select></div></div>
+  <div><label>Mood · pick what fits (optional)</label><div class="emo" id="pEmo">${Object.keys(groups).map(g=>`<span class="gl">${g.toUpperCase()}</span>`+groups[g].map(e=>`<span class="pill" data-id="${e.id}">${e.name}</span>`).join('')).join('')}</div></div><small>A cover image is required. Audio is stored on Blastr's media storage (Backblaze B2).</small></div>`);
+  $q('#pEmo').onclick=e=>{const p=e.target.closest('.pill');if(p)p.classList.toggle('on')}}
+const emos=()=>[...document.querySelectorAll('#pEmo .pill.on')].map(p=>p.dataset.id);
+const reset=()=>{const c=$q('#pCountry'),l=$q('#pLang');if(c)c.value='';if(l)l.value='';document.querySelectorAll('#pEmo .pill.on').forEach(p=>p.classList.remove('on'))};
+const pub1=window.publishSong;
+window.publishSong=async function(){
+  const m=$q('#pmsg'),bad=t=>{m.style.color='#ff6b7a';m.textContent=t};m.textContent='';
+  const t=$q('#pt').value.trim(),country=$q('#pCountry')&&$q('#pCountry').value,language=$q('#pLang')&&$q('#pLang').value;
+  if(!t||!FL.au)return bad('Add a title and an audio file');
+  if(!country||!language)return bad('Select the country of origin and the language');
+  if(!FL.cv)return bad('A cover image is required');
+  window.__bfaExtra={country,language,emotions:emos()};window.__bfaKey=null;window.__bfaInserted=null;
+  try{return await pub1.apply(this,arguments)}
+  finally{const k=window.__bfaKey,ok=window.__bfaInserted;window.__bfaExtra=null;
+    if(k&&!ok)await b2Delete(k);          // same clean-up as the Blastr admin form: no orphan files
+    if(ok)reset()}};
+inject();new MutationObserver(inject).observe(document.body,{childList:true,subtree:true});
+})();
+</script>
 </body></html>
